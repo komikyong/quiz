@@ -3,261 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>바운싱 도형 컨트롤러</title>
+    <title>학생 답안 결과 다운로드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        details[open] summary .arrow { transform: rotate(90deg); }
+        body { font-family: 'Inter', 'Malgun Gothic', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen p-4 flex flex-col items-center">
+<body class="bg-gray-100 min-h-screen p-4 md:p-8 font-sans">
 
-    <!-- 제목 -->
-    <h1 id="main-title" class="text-3xl font-bold mb-6 text-center text-indigo-900 transition-colors">바운싱 도형</h1>
-
-    <!-- 컨트롤 패널 컨테이너 (연한 파란색/보라색 톤) -->
-    <div class="w-full max-w-5xl bg-indigo-50/50 rounded-xl shadow-md mb-6 p-6 border border-indigo-100 flex flex-col gap-6">
-        
-        <!-- 1행: 텍스트 입력창, 버튼, 슬라이더, 라디오 버튼 -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-4">
-                <input type="text" id="title-input" placeholder="제목 입력..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white w-48 shadow-sm text-sm">
-                
-                <button id="color-btn" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-                    🎨 전체 색상 변경
-                </button>
+    <div class="max-w-7xl mx-auto">
+        <!-- 상단 헤더 및 버튼 영역 -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm mb-6 border border-gray-200">
+            <div class="text-center md:text-left mb-4 md:mb-0">
+                <h1 class="text-2xl font-extrabold text-gray-800 flex items-center justify-center md:justify-start">
+                    <span class="text-3xl mr-3">📊</span> 학습지 실시간 결과
+                </h1>
+                <p class="text-gray-500 mt-1 text-sm">학생들이 제출한 답안이 아래 표에 실시간으로 업데이트됩니다.</p>
             </div>
             
-            <div class="flex flex-wrap items-center gap-6">
-                <!-- 속도 슬라이더 -->
-                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-indigo-50 shadow-sm">
-                    <label for="speed-slider" class="font-semibold text-gray-700 text-sm">속도:</label>
-                    <input type="range" id="speed-slider" min="1" max="10" value="5" class="w-32 accent-indigo-600 cursor-pointer">
-                    <span id="speed-value" class="text-indigo-700 font-bold w-4 text-sm">5</span>
-                </div>
+            <button id="downloadBtn" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                CSV 엑셀 다운로드
+            </button>
+        </header>
 
-                <!-- 크기 라디오 버튼 -->
-                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-indigo-50 shadow-sm">
-                    <span class="font-semibold text-gray-700 text-sm">크기:</span>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="15" class="accent-indigo-600"> 소</label>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="30" checked class="accent-indigo-600"> 중</label>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="50" class="accent-indigo-600"> 대</label>
-                </div>
+        <!-- 데이터 테이블 영역 -->
+        <main class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">제출일시</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">학년</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">반</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">번호</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-center whitespace-nowrap">이름</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">1번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">2번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">3번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-blue-700 whitespace-nowrap">4번(주관식)</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-blue-700 whitespace-nowrap">5번(주관식)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100">
+                        <!-- 초기 로딩 상태 -->
+                        <tr>
+                            <td colspan="10" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="animate-spin mx-auto h-8 w-8 text-blue-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                데이터를 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </main>
 
-        <!-- 2행: 별점 선택 드롭다운 -->
-        <div class="flex items-center gap-4 bg-white/70 p-3 rounded-lg border border-indigo-50 shadow-sm">
-            <label for="star-select" class="font-semibold text-gray-700">별점 선택:</label>
-            <select id="star-select" class="px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700 shadow-sm cursor-pointer min-w-[150px]">
-                <option value="★☆☆☆☆ (1점)">★☆☆☆☆ (1점)</option>
-                <option value="★★☆☆☆ (2점)">★★☆☆☆ (2점)</option>
-                <option value="★★★☆☆ (3점)">★★★☆☆ (3점)</option>
-                <option value="★★★★☆ (4점)">★★★★☆ (4점)</option>
-                <option value="★★★★★ (5점)" selected>★★★★★ (5점)</option>
-            </select>
-            <span id="star-display" class="font-bold text-orange-600 text-lg ml-2">★★★★★ (5점)</span>
-        </div>
-
-        <!-- 3행: 아코디언 메뉴와 체크박스 -->
-        <details class="group bg-white rounded-lg shadow-sm border border-indigo-100 overflow-hidden" open>
-            <summary class="p-3 bg-indigo-50/80 cursor-pointer font-bold text-indigo-900 flex justify-between items-center hover:bg-indigo-100 transition-colors list-none select-none">
-                <span>⚙️ 모양 선택 및 활성화 (5개)</span>
-                <!-- Tailwind의 group-open 클래스를 이용한 화살표 회전 처리 -->
-                <span class="transform group-open:rotate-180 transition-transform duration-300 text-sm">▲</span>
-            </summary>
-            
-            <div class="p-4 border-t border-indigo-100 flex flex-wrap justify-center sm:justify-around items-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="circle" checked> 🔵 원
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="square" checked> 🟦 사각형
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="triangle" checked> 🔺 삼각형
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="star"> ⭐ 별
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="diamond"> 🔷 다이아몬드
-                </label>
-            </div>
-        </details>
+        <!-- 알림 메시지 공간 -->
+        <p id="statusMessage" class="mt-6 text-center text-sm font-medium text-gray-600 hidden transition-opacity duration-300"></p>
     </div>
 
-    <!-- 캔버스 영역 -->
-    <div class="w-full max-w-5xl bg-[#1e293b] rounded-xl shadow-xl overflow-hidden border-4 border-slate-700 relative">
-        <canvas id="bouncingCanvas" class="block w-full h-[500px]"></canvas>
-    </div>
+    <!-- Firebase 및 데이터 처리 로직 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        const canvas = document.getElementById('bouncingCanvas');
-        const ctx = canvas.getContext('2d');
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3Xt-5cjLS6FENfA65mcwstoqMQNCzokk",
+            authDomain: "vibecoding-a1519.firebaseapp.com",
+            projectId: "vibecoding-a1519",
+            storageBucket: "vibecoding-a1519.firebasestorage.app",
+            messagingSenderId: "544634316139",
+            appId: "1:544634316139:web:1b79a497143989edd8182e",
+            measurementId: "G-PV37LMZHML"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const tableBody = document.getElementById('tableBody');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // 다운로드용 캐시 데이터
+        let cachedRecords = [];
+
+        // 알림 메시지 유틸리티
+        const showMessage = (msg, type = 'success') => {
+            statusMessage.innerText = msg;
+            statusMessage.className = `mt-6 text-center text-sm font-bold ${type === 'error' ? 'text-red-500' : 'text-green-600'}`;
+            statusMessage.classList.remove('hidden');
+            setTimeout(() => statusMessage.classList.add('hidden'), 3000);
+        };
+
+        // Firestore 실시간 데이터 가져오기
+        const q = query(collection(db, "science_worksheets"), orderBy("timestamp", "asc"));
         
-        // UI 요소 연결
-        const titleInput = document.getElementById('title-input');
-        const mainTitle = document.getElementById('main-title');
-        const colorBtn = document.getElementById('color-btn');
-        const speedSlider = document.getElementById('speed-slider');
-        const speedValue = document.getElementById('speed-value');
-        const sizeRadios = document.getElementsByName('size');
-        const starSelect = document.getElementById('star-select');
-        const starDisplay = document.getElementById('star-display');
-        const shapeToggles = document.querySelectorAll('.shape-toggle');
+        onSnapshot(q, (snapshot) => {
+            cachedRecords = [];
+            tableBody.innerHTML = ''; 
 
-        // 전역 상태 변수
-        let globalRadius = 30; // 라디오 버튼 '중'의 초기값
-        let globalSpeed = 5;
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-gray-500 font-medium">아직 제출된 학생 답안이 없습니다.</td></tr>`;
+                return;
+            }
 
-        // 5개의 도형 객체 (초기 활성화 상태: 원, 사각, 삼각 true / 별, 다이아몬드 false)
-        const objects = [
-            { type: 'circle', active: true, x: 100, y: 100, dx: 2, dy: 1.5, color: '#3b82f6' },   // 파란색
-            { type: 'square', active: true, x: 300, y: 150, dx: -1.5, dy: 2, color: '#ef4444' },  // 빨간색
-            { type: 'triangle', active: true, x: 500, y: 200, dx: 2.5, dy: -1, color: '#10b981' },// 초록색
-            { type: 'star', active: false, x: 200, y: 300, dx: -2, dy: -2.5, color: '#eab308' },  // 노란색
-            { type: 'diamond', active: false, x: 400, y: 400, dx: 1.5, dy: 3, color: '#6366f1' }  // 남색
-        ];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const answers = data.answers || {};
+                const time = data.timestamp ? data.timestamp.toDate().toLocaleString('ko-KR') : "시간 없음";
 
-        // 캔버스 사이즈 조절 및 위치 보정
-        function resizeCanvas() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-            objects.forEach(checkBoundary);
-        }
-        window.addEventListener('resize', resizeCanvas);
+                cachedRecords.push({
+                    time, grade: data.grade || '', classNum: data.classNum || '',
+                    studentNum: data.studentNum || '', name: data.name || '',
+                    q1: answers.q1 || '', q2: answers.q2 || '', q3: answers.q3 || '',
+                    q4: answers.q4 || '', q5: answers.q5 || ''
+                });
 
-        // 1. 텍스트 입력창 이벤트
-        titleInput.addEventListener('input', e => {
-            mainTitle.textContent = e.target.value.trim() || '바운싱 도형';
-        });
-
-        // 2. 전체 색상 변경 버튼 이벤트 (활성화된 도형만 무작위 색상으로)
-        colorBtn.addEventListener('click', () => {
-            objects.forEach(obj => {
-                if (obj.active) {
-                    obj.color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-                }
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${time}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.grade}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.classNum}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.studentNum}</td>
+                    <td class="px-6 py-4 text-center font-extrabold text-gray-900 bg-gray-50/50">${data.name}</td>
+                    <td class="px-6 py-4">${answers.q1 || '-'}</td>
+                    <td class="px-6 py-4">${answers.q2 || '-'}</td>
+                    <td class="px-6 py-4">${answers.q3 || '-'}</td>
+                    <td class="px-6 py-4 text-blue-700 font-medium">${answers.q4 || '-'}</td>
+                    <td class="px-6 py-4 text-blue-700 font-medium">${answers.q5 || '-'}</td>
+                `;
+                tableBody.appendChild(tr);
             });
+        }, (error) => {
+            console.error("Firestore 실시간 수신 에러:", error);
+            tableBody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-red-500 font-bold">데이터를 불러오는 중 오류가 발생했습니다. 권한 설정을 확인하세요.</td></tr>`;
         });
 
-        // 3. 속도 조절 슬라이더 이벤트
-        speedSlider.addEventListener('input', e => {
-            globalSpeed = parseInt(e.target.value);
-            speedValue.textContent = globalSpeed;
-        });
+        // CSV 다운로드 버튼 이벤트
+        downloadBtn.addEventListener('click', () => {
+            if (cachedRecords.length === 0) {
+                showMessage("다운로드할 데이터가 없습니다.", "error");
+                return;
+            }
 
-        // 4. 크기 라디오 버튼 이벤트
-        sizeRadios.forEach(radio => {
-            radio.addEventListener('change', e => {
-                globalRadius = parseInt(e.target.value);
-                objects.forEach(checkBoundary); // 크기 변경 즉시 바운더리 검사
+            // 한글 깨짐 방지 BOM 추가
+            let csvContent = "\uFEFF"; 
+            csvContent += "제출일시,학년,반,번호,이름,1번 답,2번 답,3번 답,4번 답,5번 답\n";
+
+            const escape = (str) => `"${String(str).replace(/"/g, '""')}"`;
+
+            cachedRecords.forEach(record => {
+                const row = [
+                    escape(record.time), escape(record.grade), escape(record.classNum),
+                    escape(record.studentNum), escape(record.name),
+                    escape(record.q1), escape(record.q2), escape(record.q3),
+                    escape(record.q4), escape(record.q5)
+                ];
+                csvContent += row.join(",") + "\n";
             });
-        });
 
-        // 5. 별점 드롭다운 메뉴 이벤트
-        starSelect.addEventListener('change', e => {
-            starDisplay.textContent = e.target.value;
-        });
-
-        // 6. 아코디언 메뉴 속 체크박스 이벤트
-        shapeToggles.forEach(toggle => {
-            toggle.addEventListener('change', e => {
-                const shapeType = e.target.value;
-                const obj = objects.find(o => o.type === shapeType);
-                if (obj) {
-                    obj.active = e.target.checked;
-                }
-            });
-        });
-
-        // 도형 경계선 이탈 방지
-        function checkBoundary(obj) {
-            if (obj.x + globalRadius > canvas.width) obj.x = canvas.width - globalRadius;
-            if (obj.x - globalRadius < 0) obj.x = globalRadius;
-            if (obj.y + globalRadius > canvas.height) obj.y = canvas.height - globalRadius;
-            if (obj.y - globalRadius < 0) obj.y = globalRadius;
-        }
-
-        // 도형 그리기
-        function drawShape(obj) {
-            ctx.fillStyle = obj.color;
-            ctx.beginPath();
+            // 파일 다운로드 생성
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
             
-            if (obj.type === 'circle') {
-                ctx.arc(obj.x, obj.y, globalRadius, 0, Math.PI * 2);
-            } else if (obj.type === 'square') {
-                ctx.rect(obj.x - globalRadius, obj.y - globalRadius, globalRadius * 2, globalRadius * 2);
-            } else if (obj.type === 'triangle') {
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                ctx.lineTo(obj.x + globalRadius, obj.y + globalRadius);
-                ctx.lineTo(obj.x - globalRadius, obj.y + globalRadius);
-            } else if (obj.type === 'diamond') {
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                ctx.lineTo(obj.x + globalRadius, obj.y);
-                ctx.lineTo(obj.x, obj.y + globalRadius);
-                ctx.lineTo(obj.x - globalRadius, obj.y);
-            } else if (obj.type === 'star') {
-                let rot = Math.PI / 2 * 3;
-                let step = Math.PI / 5;
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                for (let i = 0; i < 5; i++) {
-                    ctx.lineTo(obj.x + Math.cos(rot) * globalRadius, obj.y + Math.sin(rot) * globalRadius);
-                    rot += step;
-                    ctx.lineTo(obj.x + Math.cos(rot) * (globalRadius / 2), obj.y + Math.sin(rot) * (globalRadius / 2));
-                    rot += step;
-                }
-            }
-            ctx.closePath();
-            ctx.fill();
+            const dateStr = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `학생답안결과_${dateStr}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-            // 입체감 (하이라이트) 부여
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            if (obj.type === 'circle') {
-                ctx.beginPath();
-                ctx.arc(obj.x - globalRadius*0.3, obj.y - globalRadius*0.3, globalRadius*0.4, 0, Math.PI*2);
-                ctx.fill();
-            } else if (obj.type === 'square') {
-                ctx.fillRect(obj.x - globalRadius, obj.y - globalRadius, globalRadius * 2, globalRadius * 0.5);
-            } else {
-                ctx.beginPath();
-                ctx.arc(obj.x, obj.y, globalRadius*0.3, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-
-        // 애니메이션 루프
-        function update() {
-            requestAnimationFrame(update);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            objects.forEach(obj => {
-                if (!obj.active) return; // 활성화되지 않은 도형은 그리지도 움직이지도 않음
-
-                drawShape(obj);
-                
-                // 속도 슬라이더 값 반영 (기본 속도 dx, dy에 슬라이더 배율 적용)
-                const currentSpeedMultiplier = globalSpeed / 4; 
-                obj.x += obj.dx * currentSpeedMultiplier;
-                obj.y += obj.dy * currentSpeedMultiplier;
-
-                // 벽 충돌 감지 로직
-                if (obj.x + globalRadius > canvas.width || obj.x - globalRadius < 0) {
-                    obj.dx = -obj.dx;
-                    obj.x = obj.x + globalRadius > canvas.width ? canvas.width - globalRadius : globalRadius;
-                }
-                if (obj.y + globalRadius > canvas.height || obj.y - globalRadius < 0) {
-                    obj.dy = -obj.dy;
-                    obj.y = obj.y + globalRadius > canvas.height ? canvas.height - globalRadius : globalRadius;
-                }
-            });
-        }
-
-        // 초기 렌더링 시작
-        resizeCanvas();
-        update();
+            showMessage("CSV 다운로드가 완료되었습니다!");
+        });
     </script>
 </body>
 </html>

@@ -3,150 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bouncing Ball</title>
-    <!-- 스타일링을 위해 Tailwind CSS 사용 -->
+    <title>학생 답안 결과 다운로드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            /* 페이지 전체 배경색 설정 */
-            background-color: #f3f4f6; 
-            margin: 0;
-            overflow: hidden; /* 스크롤바 방지 */
-        }
-        
-        #canvas-container {
-            /* 캔버스가 화면에 꽉 차면서도 직사각형 비율을 유지하도록 설정 */
-            width: 90vw;
-            max-width: 800px;
-            aspect-ratio: 16 / 9;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 12px;
-            overflow: hidden;
-            background-color: #1e293b; /* 캔버스 뒷배경 (어두운 남색) */
-            border: 4px solid #334155;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+        body { font-family: 'Inter', 'Malgun Gothic', sans-serif; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen">
+<body class="bg-gray-100 min-h-screen p-4 md:p-8 font-sans">
 
-    <div class="mb-6 text-center">
-        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">바운싱 볼</h1>
-        <p class="text-gray-500 mt-2 mb-4">공이 벽에 부딪히면 튕겨 나옵니다.</p>
-        <button id="colorBtn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out transform hover:-translate-y-0.5">
-            공 색상 변경하기
-        </button>
+    <div class="max-w-7xl mx-auto">
+        <!-- 상단 헤더 및 버튼 영역 -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm mb-6 border border-gray-200">
+            <div class="text-center md:text-left mb-4 md:mb-0">
+                <h1 class="text-2xl font-extrabold text-gray-800 flex items-center justify-center md:justify-start">
+                    <span class="text-3xl mr-3">📊</span> 학습지 실시간 결과
+                </h1>
+                <p class="text-gray-500 mt-1 text-sm">학생들이 제출한 답안이 아래 표에 실시간으로 업데이트됩니다.</p>
+            </div>
+            
+            <button id="downloadBtn" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                CSV 엑셀 다운로드
+            </button>
+        </header>
+
+        <!-- 데이터 테이블 영역 -->
+        <main class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">제출일시</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">학년</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">반</th>
+                            <th scope="col" class="px-4 py-4 font-bold text-center whitespace-nowrap">번호</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-center whitespace-nowrap">이름</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">1번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">2번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold whitespace-nowrap">3번(객)</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-blue-700 whitespace-nowrap">4번(주관식)</th>
+                            <th scope="col" class="px-6 py-4 font-bold text-blue-700 whitespace-nowrap">5번(주관식)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100">
+                        <!-- 초기 로딩 상태 -->
+                        <tr>
+                            <td colspan="10" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="animate-spin mx-auto h-8 w-8 text-blue-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                데이터를 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- 알림 메시지 공간 -->
+        <p id="statusMessage" class="mt-6 text-center text-sm font-medium text-gray-600 hidden transition-opacity duration-300"></p>
     </div>
 
-    <!-- 캔버스를 감싸는 컨테이너 -->
-    <div id="canvas-container">
-        <canvas id="gameCanvas"></canvas>
-    </div>
+    <!-- Firebase 및 데이터 처리 로직 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // 캔버스 크기를 내부 해상도와 CSS 렌더링 크기와 일치시키는 함수
-        function resizeCanvas() {
-            const container = document.getElementById('canvas-container');
-            // 레티나 디스플레이 등 고해상도 화면에서도 선명하게 보이도록 처리 가능하지만,
-            // 여기서는 단순함을 위해 컨테이너의 실제 크기로 설정합니다.
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-
-        // 초기 사이즈 설정
-        resizeCanvas();
-
-        // 창 크기가 변경될 때 캔버스 크기 재조정
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            // 화면 크기가 변할 때 공이 화면 밖으로 나가는 것을 방지
-            if (ball.x > canvas.width - ball.radius) ball.x = canvas.width - ball.radius;
-            if (ball.y > canvas.height - ball.radius) ball.y = canvas.height - ball.radius;
-        });
-
-        // 공 객체 정의
-        const ball = {
-            x: canvas.width / 2, // 시작 x 좌표 (중앙)
-            y: canvas.height / 2, // 시작 y 좌표 (중앙)
-            radius: 20,           // 공의 반지름
-            dx: 5,                // x축 이동 속도
-            dy: 4,                // y축 이동 속도
-            color: '#f43f5e'      // 눈에 띄는 장미색(Rose) 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6GfcT7AFXygdA5X852ZJUa9TdKslvPWQ",
+            authDomain: "gen-lang-client-0872165124.firebaseapp.com",
+            projectId: "gen-lang-client-0872165124",
+            storageBucket: "gen-lang-client-0872165124.firebasestorage.app",
+            messagingSenderId: "24653764057",
+            appId: "1:24653764057:web:9a386a12eeb8f7dd4db5c8"
         };
 
-        // 랜덤 색상 생성 함수
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // 버튼 클릭 이벤트 리스너
-        document.getElementById('colorBtn').addEventListener('click', () => {
-            ball.color = getRandomColor();
+        const tableBody = document.getElementById('tableBody');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // 다운로드용 캐시 데이터
+        let cachedRecords = [];
+
+        // 알림 메시지 유틸리티
+        const showMessage = (msg, type = 'success') => {
+            statusMessage.innerText = msg;
+            statusMessage.className = `mt-6 text-center text-sm font-bold ${type === 'error' ? 'text-red-500' : 'text-green-600'}`;
+            statusMessage.classList.remove('hidden');
+            setTimeout(() => statusMessage.classList.add('hidden'), 3000);
+        };
+
+        // Firestore 실시간 데이터 가져오기
+        const q = query(collection(db, "science_worksheets"), orderBy("timestamp", "asc"));
+        
+        onSnapshot(q, (snapshot) => {
+            cachedRecords = [];
+            tableBody.innerHTML = ''; 
+
+            if (snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-gray-500 font-medium">아직 제출된 학생 답안이 없습니다.</td></tr>`;
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const answers = data.answers || {};
+                const time = data.timestamp ? data.timestamp.toDate().toLocaleString('ko-KR') : "시간 없음";
+
+                cachedRecords.push({
+                    time, grade: data.grade || '', classNum: data.classNum || '',
+                    studentNum: data.studentNum || '', name: data.name || '',
+                    q1: answers.q1 || '', q2: answers.q2 || '', q3: answers.q3 || '',
+                    q4: answers.q4 || '', q5: answers.q5 || ''
+                });
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">${time}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.grade}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.classNum}</td>
+                    <td class="px-4 py-4 text-center font-medium">${data.studentNum}</td>
+                    <td class="px-6 py-4 text-center font-extrabold text-gray-900 bg-gray-50/50">${data.name}</td>
+                    <td class="px-6 py-4">${answers.q1 || '-'}</td>
+                    <td class="px-6 py-4">${answers.q2 || '-'}</td>
+                    <td class="px-6 py-4">${answers.q3 || '-'}</td>
+                    <td class="px-6 py-4 text-blue-700 font-medium">${answers.q4 || '-'}</td>
+                    <td class="px-6 py-4 text-blue-700 font-medium">${answers.q5 || '-'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }, (error) => {
+            console.error("Firestore 실시간 수신 에러:", error);
+            tableBody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-red-500 font-bold">데이터를 불러오는 중 오류가 발생했습니다. 권한 설정을 확인하세요.</td></tr>`;
         });
 
-        // 공을 그리는 함수
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            
-            // 공에 약간의 입체감을 주기 위한 그라데이션 (선택사항)
-            const gradient = ctx.createRadialGradient(
-                ball.x - ball.radius / 3, ball.y - ball.radius / 3, ball.radius / 10, 
-                ball.x, ball.y, ball.radius
-            );
-            // 어떤 색상이 무작위로 선택되든 자연스럽게 하이라이트가 지도록 흰색 반투명 사용
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)'); 
-            gradient.addColorStop(1, ball.color); // 기본 색
-            
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        // 애니메이션 업데이트 함수
-        function update() {
-            // 이전 프레임의 흔적을 지우기 (직사각형 배경을 칠함)
-            // 투명도를 주어 꼬리 효과를 만들 수도 있지만, 명확한 배경을 원하셨으므로 clearRect 사용
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // 공 그리기
-            drawBall();
-
-            // 왼쪽 또는 오른쪽 벽 충돌 감지
-            if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
-                ball.dx = -ball.dx; // x축 방향 반전
+        // CSV 다운로드 버튼 이벤트
+        downloadBtn.addEventListener('click', () => {
+            if (cachedRecords.length === 0) {
+                showMessage("다운로드할 데이터가 없습니다.", "error");
+                return;
             }
 
-            // 위쪽 또는 아래쪽 벽 충돌 감지
-            if (ball.y + ball.dy > canvas.height - ball.radius || ball.y + ball.dy < ball.radius) {
-                ball.dy = -ball.dy; // y축 방향 반전
-            }
+            // 한글 깨짐 방지 BOM 추가
+            let csvContent = "\uFEFF"; 
+            csvContent += "제출일시,학년,반,번호,이름,1번 답,2번 답,3번 답,4번 답,5번 답\n";
 
-            // 공의 위치 이동
-            ball.x += ball.dx;
-            ball.y += ball.dy;
+            const escape = (str) => `"${String(str).replace(/"/g, '""')}"`;
 
-            // 다음 프레임 요청
-            requestAnimationFrame(update);
-        }
+            cachedRecords.forEach(record => {
+                const row = [
+                    escape(record.time), escape(record.grade), escape(record.classNum),
+                    escape(record.studentNum), escape(record.name),
+                    escape(record.q1), escape(record.q2), escape(record.q3),
+                    escape(record.q4), escape(record.q5)
+                ];
+                csvContent += row.join(",") + "\n";
+            });
 
-        // 애니메이션 시작
-        window.onload = function() {
-            update();
-        }
+            // 파일 다운로드 생성
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            const dateStr = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `학생답안결과_${dateStr}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showMessage("CSV 다운로드가 완료되었습니다!");
+        });
     </script>
 </body>
 </html>
