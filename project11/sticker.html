@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 1학년 칭찬 스티커판</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 귀여운 느낌의 Jua 폰트 적용 (1학년 맞춤) -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fef9c3; /* 연한 노란색 배경 (bg-yellow-50) */
+            background-image: radial-gradient(#fde047 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1, h2, h3, .font-jua {
+            font-family: 'Jua', sans-serif;
+        }
+
+        /* 스티커 추가 시 팝 애니메이션 */
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .sticker-anim {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fcd34d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+
+        /* 카드 호버 효과 */
+        .board-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .board-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800 pb-10">
+
+    <!-- 상단 네비게이션 및 헤더 -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 class="text-3xl md:text-4xl text-yellow-500 font-jua drop-shadow-sm flex items-center gap-2">
+                    <span class="text-4xl">🌟</span> 우리 반 칭찬 스티커
+                </h1>
+                
+                <!-- 반 선택기 -->
+                <div class="flex flex-wrap justify-center gap-2" id="class-selector">
+                    <!-- JS로 버튼 렌더링 -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-6 flex flex-col">
+        
+        <!-- 컨트롤 패널 (탭 및 설정) -->
+        <div class="bg-white rounded-2xl p-2 shadow-sm border border-yellow-100 flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            
+            <!-- 탭 (모둠별 / 학생별) -->
+            <div class="flex bg-gray-100 rounded-xl p-1 w-full sm:w-auto" id="tab-container">
+                <button onclick="switchTab('groups')" id="tab-groups" class="flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors bg-white text-yellow-600 shadow">
+                    👥 모둠별
+                </button>
+                <button onclick="switchTab('students')" id="tab-students" class="flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors text-gray-500 hover:text-gray-700">
+                    🧑‍🎓 학생별 (개인)
+                </button>
+            </div>
+
+            <!-- 관리 버튼 -->
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button onclick="openAddModal()" class="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-1 shadow-sm">
+                    <span>➕</span> <span id="add-btn-text">추가하기</span>
+                </button>
+                <button onclick="openResetModal()" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 text-red-500 font-bold py-2 px-4 border border-red-200 rounded-xl transition-colors text-sm shadow-sm">
+                    전체 초기화
+                </button>
+            </div>
+        </div>
+
+        <!-- 스티커 보드 그리드 -->
+        <div id="board-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <!-- JS로 카드 렌더링 -->
+        </div>
+
+    </main>
+
+    <!-- 공통 모달 컨테이너 -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div id="modal-content" class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden pop-animation transform transition-all">
+            <!-- 모달 내용은 JS로 동적 주입 -->
+        </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 translate-y-[150%] opacity-0 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg font-bold transition-all duration-300 z-50 flex items-center gap-2">
+        <span id="toast-icon">✨</span> <span id="toast-message">저장되었습니다.</span>
+    </div>
+
+    <script>
+        // === 상태 관리 ===
+        const STORAGE_KEY = 'sticker_board_1st_grade';
+        let appData = {};
+        let currentClass = 1;
+        let currentTab = 'groups'; // 'groups' 또는 'students'
+
+        // === 데이터 초기화 ===
+        function initializeData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                // 혹시나 이전 버전 데이터 누락 방지 (1~8반 확인)
+                for(let i=1; i<=8; i++) {
+                    if(!appData[i]) appData[i] = createDefaultClassData();
+                }
+            } else {
+                for(let i=1; i<=8; i++) {
+                    appData[i] = createDefaultClassData();
+                }
+                saveData();
+            }
+        }
+
+        function createDefaultClassData() {
+            return {
+                groups: Array.from({length: 6}, (_, idx) => ({ id: generateId(), name: `${idx+1}모둠`, count: 0 })),
+                students: Array.from({length: 25}, (_, idx) => ({ id: generateId(), name: `${idx+1}번`, count: 0 }))
+            };
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+
+        // === UI 렌더링 ===
+        function renderClassSelector() {
+            const container = document.getElementById('class-selector');
+            container.innerHTML = '';
+            
+            for(let i=1; i<=8; i++) {
+                const btn = document.createElement('button');
+                const isSelected = i === currentClass;
+                
+                btn.className = `w-10 h-10 md:w-12 md:h-12 rounded-full font-jua text-lg md:text-xl transition-all shadow-sm flex items-center justify-center border-2 
+                    ${isSelected ? 'bg-yellow-400 text-white border-yellow-400 transform scale-110' : 'bg-white text-gray-500 border-gray-200 hover:border-yellow-300 hover:text-yellow-500'}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentClass = i;
+                    renderClassSelector();
+                    renderBoard();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            const btnGroups = document.getElementById('tab-groups');
+            const btnStudents = document.getElementById('tab-students');
+            
+            if(tab === 'groups') {
+                btnGroups.className = "flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors bg-white text-yellow-600 shadow";
+                btnStudents.className = "flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors text-gray-500 hover:text-gray-700";
+                document.getElementById('add-btn-text').innerText = "모둠 추가";
+            } else {
+                btnStudents.className = "flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors bg-white text-yellow-600 shadow";
+                btnGroups.className = "flex-1 sm:flex-none px-6 py-2 rounded-lg font-jua text-lg transition-colors text-gray-500 hover:text-gray-700";
+                document.getElementById('add-btn-text').innerText = "학생 추가";
+            }
+            
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById('board-grid');
+            grid.innerHTML = '';
+            
+            const items = appData[currentClass][currentTab];
+            const isGroup = currentTab === 'groups';
+
+            if(items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-gray-400">
+                        <span class="text-5xl mb-4">🫥</span>
+                        <p class="font-bold">등록된 ${isGroup ? '모둠' : '학생'}이 없습니다.</p>
+                    </div>`;
+                return;
+            }
+
+            items.forEach((item) => {
+                const card = document.createElement('div');
+                // 모둠은 하늘색 톤, 개인은 분홍색 톤 배경 적용
+                const bgColor = isGroup ? 'bg-blue-50 border-blue-200' : 'bg-pink-50 border-pink-200';
+                const titleColor = isGroup ? 'text-blue-800' : 'text-pink-800';
+                
+                card.className = `board-card ${bgColor} border-2 rounded-3xl p-5 shadow-sm relative flex flex-col h-full`;
+                
+                // 스티커 시각화 로직 (최대 20개까지만 표시하고, 넘으면 숫자+아이콘으로 요약)
+                let stickersHTML = '';
+                if (item.count > 0 && item.count <= 20) {
+                    for(let i=0; i<item.count; i++) {
+                        stickersHTML += `<span class="text-2xl sticker-anim drop-shadow-sm">⭐</span>`;
+                    }
+                } else if (item.count > 20) {
+                    stickersHTML = `<div class="flex items-center gap-1"><span class="text-3xl">⭐</span><span class="font-jua text-2xl text-yellow-600">x ${item.count}</span></div>`;
+                } else {
+                    stickersHTML = `<span class="text-gray-300 text-sm italic">스티커가 없어요</span>`;
+                }
+
+                card.innerHTML = `
+                    <!-- 상단 헤더: 이름 및 수정/삭제 버튼 -->
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="${titleColor} font-jua text-2xl truncate pr-2 cursor-pointer hover:underline" onclick="openEditModal('${item.id}', '${item.name}')" title="이름 수정하기">
+                            ${item.name}
+                        </h3>
+                        <button onclick="openDeleteModal('${item.id}', '${item.name}')" class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    
+                    <!-- 스티커 표시 영역 -->
+                    <div class="flex-1 flex flex-wrap content-start gap-1 min-h-[80px] mb-4 bg-white/50 rounded-xl p-3 border border-white/60">
+                        ${stickersHTML}
+                    </div>
+                    
+                    <!-- 하단 컨트롤 (수량 조절) -->
+                    <div class="flex justify-between items-center bg-white rounded-2xl p-2 border border-gray-100 shadow-sm mt-auto">
+                        <button onclick="updateSticker('${item.id}', -1)" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-black text-xl flex items-center justify-center transition-colors active:scale-95 disabled:opacity-30" ${item.count === 0 ? 'disabled' : ''}>
+                            -
+                        </button>
+                        <div class="flex flex-col items-center">
+                            <span class="font-jua text-3xl text-gray-800 leading-none">${item.count}</span>
+                        </div>
+                        <button onclick="updateSticker('${item.id}', 1)" class="w-10 h-10 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white font-black text-xl flex items-center justify-center transition-colors active:scale-95 shadow-sm">
+                            +
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // === 데이터 조작 액션 ===
+        function updateSticker(id, change) {
+            const items = appData[currentClass][currentTab];
+            const item = items.find(i => i.id === id);
+            if (item) {
+                if (item.count + change >= 0) {
+                    item.count += change;
+                    saveData();
+                    renderBoard(); // 전체 다시 그리기
+                    if (change > 0) showToast(`${item.name} 스티커 추가!`, '⭐️');
+                }
+            }
+        }
+
+        function deleteItem(id) {
+            appData[currentClass][currentTab] = appData[currentClass][currentTab].filter(i => i.id !== id);
+            saveData();
+            renderBoard();
+            closeModal();
+            showToast('삭제되었습니다.', '🗑️');
+        }
+
+        function saveItemName(id, newName) {
+            if(!newName.trim()) return;
+            const items = appData[currentClass][currentTab];
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.name = newName.trim();
+                saveData();
+                renderBoard();
+                closeModal();
+                showToast('이름이 변경되었습니다.', '✏️');
+            }
+        }
+
+        function addNewItem(name) {
+            if(!name.trim()) return;
+            appData[currentClass][currentTab].push({
+                id: generateId(),
+                name: name.trim(),
+                count: 0
+            });
+            saveData();
+            renderBoard();
+            closeModal();
+            showToast(`${name} 추가 완료!`, '✅');
+        }
+
+        function resetCurrentTabStickers() {
+            appData[currentClass][currentTab].forEach(item => item.count = 0);
+            saveData();
+            renderBoard();
+            closeModal();
+            showToast('모든 스티커가 초기화되었습니다.', '✨');
+        }
+
+        // === 모달 시스템 (alert/confirm 대체) ===
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+
+        function openModal(htmlContent) {
+            modalContent.innerHTML = htmlContent;
+            modalOverlay.classList.remove('hidden');
+            // 애니메이션을 위해 약간의 딜레이
+            setTimeout(() => {
+                modalContent.style.transform = 'scale(1)';
+                modalContent.style.opacity = '1';
+            }, 10);
+            
+            // 입력창이 있다면 포커스
+            const input = document.getElementById('modal-input');
+            if(input) input.focus();
+        }
+
+        function closeModal() {
+            modalContent.style.transform = 'scale(0.9)';
+            modalContent.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+            }, 200);
+        }
+
+        // 오버레이 클릭 시 닫기
+        modalOverlay.addEventListener('click', (e) => {
+            if(e.target === modalOverlay) closeModal();
+        });
+
+        function openAddModal() {
+            const isGroup = currentTab === 'groups';
+            const title = isGroup ? '새 모둠 추가' : '새 학생 추가';
+            const placeholder = isGroup ? '예: 7모둠, 햇님모둠' : '예: 26번, 홍길동';
+            
+            const html = `
+                <div class="p-6 bg-white">
+                    <h2 class="font-jua text-2xl mb-4 text-gray-800">${title}</h2>
+                    <input type="text" id="modal-input" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400 focus:outline-none mb-6 font-bold" placeholder="${placeholder}" onkeypress="if(event.key==='Enter') document.getElementById('modal-save-btn').click()">
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">취소</button>
+                        <button id="modal-save-btn" onclick="addNewItem(document.getElementById('modal-input').value)" class="flex-1 py-3 bg-yellow-400 text-white rounded-xl font-bold hover:bg-yellow-500 transition-colors shadow-sm">추가하기</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        function openEditModal(id, currentName) {
+            const html = `
+                <div class="p-6 bg-white">
+                    <h2 class="font-jua text-2xl mb-4 text-gray-800">이름 수정</h2>
+                    <input type="text" id="modal-input" value="${currentName}" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400 focus:outline-none mb-6 font-bold" onkeypress="if(event.key==='Enter') document.getElementById('modal-save-btn').click()">
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">취소</button>
+                        <button id="modal-save-btn" onclick="saveItemName('${id}', document.getElementById('modal-input').value)" class="flex-1 py-3 bg-yellow-400 text-white rounded-xl font-bold hover:bg-yellow-500 transition-colors shadow-sm">저장하기</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        function openDeleteModal(id, name) {
+            const html = `
+                <div class="p-6 bg-white text-center">
+                    <div class="text-4xl mb-4">🗑️</div>
+                    <h2 class="font-jua text-2xl mb-2 text-gray-800">정말 삭제할까요?</h2>
+                    <p class="text-gray-500 mb-6 font-medium"><span class="font-bold text-red-500">${name}</span> 데이터가 완전히 지워집니다.</p>
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">취소</button>
+                        <button onclick="deleteItem('${id}')" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors shadow-sm">삭제하기</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        function openResetModal() {
+            const targetName = currentTab === 'groups' ? '모든 모둠' : '모든 학생';
+            const html = `
+                <div class="p-6 bg-white text-center">
+                    <div class="text-4xl mb-4">⚠️</div>
+                    <h2 class="font-jua text-2xl mb-2 text-gray-800">스티커 전체 초기화</h2>
+                    <p class="text-gray-500 mb-6 font-medium">${currentClass}반 <span class="font-bold text-red-500">${targetName}</span>의 스티커를 모두 0개로 되돌립니다.</p>
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">취소</button>
+                        <button onclick="resetCurrentTabStickers()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors shadow-sm">초기화</button>
+                    </div>
+                </div>
+            `;
+            openModal(html);
+        }
+
+        // === 유틸리티 ===
+        function showToast(message, icon = '✨') {
+            const toastElement = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            document.getElementById('toast-icon').innerText = icon;
+            
+            toastElement.classList.remove('translate-y-[150%]', 'opacity-0');
+            toastElement.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toastElement.classList.remove('translate-y-0', 'opacity-100');
+                toastElement.classList.add('translate-y-[150%]', 'opacity-0');
+            }, 2000);
+        }
+
+        // === 앱 시작 ===
+        window.onload = () => {
+            initializeData();
+            renderClassSelector();
+            renderBoard();
+        };
+
+    </script>
+</body>
+</html>

@@ -3,261 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>바운싱 도형 컨트롤러</title>
+    <title>나의 프로젝트 포트폴리오</title>
+    <!-- Tailwind CSS 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        details[open] summary .arrow { transform: rotate(90deg); }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen p-4 flex flex-col items-center">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6">
 
-    <!-- 제목 -->
-    <h1 id="main-title" class="text-3xl font-bold mb-6 text-center text-indigo-900 transition-colors">바운싱 도형</h1>
-
-    <!-- 컨트롤 패널 컨테이너 (연한 파란색/보라색 톤) -->
-    <div class="w-full max-w-5xl bg-indigo-50/50 rounded-xl shadow-md mb-6 p-6 border border-indigo-100 flex flex-col gap-6">
-        
-        <!-- 1행: 텍스트 입력창, 버튼, 슬라이더, 라디오 버튼 -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-4">
-                <input type="text" id="title-input" placeholder="제목 입력..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white w-48 shadow-sm text-sm">
-                
-                <button id="color-btn" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-                    🎨 전체 색상 변경
-                </button>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-6">
-                <!-- 속도 슬라이더 -->
-                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-indigo-50 shadow-sm">
-                    <label for="speed-slider" class="font-semibold text-gray-700 text-sm">속도:</label>
-                    <input type="range" id="speed-slider" min="1" max="10" value="5" class="w-32 accent-indigo-600 cursor-pointer">
-                    <span id="speed-value" class="text-indigo-700 font-bold w-4 text-sm">5</span>
-                </div>
-
-                <!-- 크기 라디오 버튼 -->
-                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-indigo-50 shadow-sm">
-                    <span class="font-semibold text-gray-700 text-sm">크기:</span>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="15" class="accent-indigo-600"> 소</label>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="30" checked class="accent-indigo-600"> 중</label>
-                    <label class="flex items-center gap-1 cursor-pointer text-sm"><input type="radio" name="size" value="50" class="accent-indigo-600"> 대</label>
-                </div>
-            </div>
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- 헤더 영역 -->
+        <div class="bg-blue-600 text-white p-8 text-center">
+            <h1 class="text-3xl font-bold mb-2">프로젝트 디렉토리</h1>
+            <p class="text-blue-100">GitHub Pages 인덱스 파일</p>
         </div>
 
-        <!-- 2행: 별점 선택 드롭다운 -->
-        <div class="flex items-center gap-4 bg-white/70 p-3 rounded-lg border border-indigo-50 shadow-sm">
-            <label for="star-select" class="font-semibold text-gray-700">별점 선택:</label>
-            <select id="star-select" class="px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700 shadow-sm cursor-pointer min-w-[150px]">
-                <option value="★☆☆☆☆ (1점)">★☆☆☆☆ (1점)</option>
-                <option value="★★☆☆☆ (2점)">★★☆☆☆ (2점)</option>
-                <option value="★★★☆☆ (3점)">★★★☆☆ (3점)</option>
-                <option value="★★★★☆ (4점)">★★★★☆ (4점)</option>
-                <option value="★★★★★ (5점)" selected>★★★★★ (5점)</option>
-            </select>
-            <span id="star-display" class="font-bold text-orange-600 text-lg ml-2">★★★★★ (5점)</span>
-        </div>
-
-        <!-- 3행: 아코디언 메뉴와 체크박스 -->
-        <details class="group bg-white rounded-lg shadow-sm border border-indigo-100 overflow-hidden" open>
-            <summary class="p-3 bg-indigo-50/80 cursor-pointer font-bold text-indigo-900 flex justify-between items-center hover:bg-indigo-100 transition-colors list-none select-none">
-                <span>⚙️ 모양 선택 및 활성화 (5개)</span>
-                <!-- Tailwind의 group-open 클래스를 이용한 화살표 회전 처리 -->
-                <span class="transform group-open:rotate-180 transition-transform duration-300 text-sm">▲</span>
-            </summary>
+        <!-- 프로젝트 목록 영역 -->
+        <div class="p-8 space-y-8">
             
-            <div class="p-4 border-t border-indigo-100 flex flex-wrap justify-center sm:justify-around items-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="circle" checked> 🔵 원
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="square" checked> 🟦 사각형
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="triangle" checked> 🔺 삼각형
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="star"> ⭐ 별
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-indigo-600 transition">
-                    <input type="checkbox" class="shape-toggle w-5 h-5 accent-indigo-600 rounded cursor-pointer" value="diamond"> 🔷 다이아몬드
-                </label>
-            </div>
-        </details>
-    </div>
-
-    <!-- 캔버스 영역 -->
-    <div class="w-full max-w-5xl bg-[#1e293b] rounded-xl shadow-xl overflow-hidden border-4 border-slate-700 relative">
-        <canvas id="bouncingCanvas" class="block w-full h-[500px]"></canvas>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('bouncingCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // UI 요소 연결
-        const titleInput = document.getElementById('title-input');
-        const mainTitle = document.getElementById('main-title');
-        const colorBtn = document.getElementById('color-btn');
-        const speedSlider = document.getElementById('speed-slider');
-        const speedValue = document.getElementById('speed-value');
-        const sizeRadios = document.getElementsByName('size');
-        const starSelect = document.getElementById('star-select');
-        const starDisplay = document.getElementById('star-display');
-        const shapeToggles = document.querySelectorAll('.shape-toggle');
-
-        // 전역 상태 변수
-        let globalRadius = 30; // 라디오 버튼 '중'의 초기값
-        let globalSpeed = 5;
-
-        // 5개의 도형 객체 (초기 활성화 상태: 원, 사각, 삼각 true / 별, 다이아몬드 false)
-        const objects = [
-            { type: 'circle', active: true, x: 100, y: 100, dx: 2, dy: 1.5, color: '#3b82f6' },   // 파란색
-            { type: 'square', active: true, x: 300, y: 150, dx: -1.5, dy: 2, color: '#ef4444' },  // 빨간색
-            { type: 'triangle', active: true, x: 500, y: 200, dx: 2.5, dy: -1, color: '#10b981' },// 초록색
-            { type: 'star', active: false, x: 200, y: 300, dx: -2, dy: -2.5, color: '#eab308' },  // 노란색
-            { type: 'diamond', active: false, x: 400, y: 400, dx: 1.5, dy: 3, color: '#6366f1' }  // 남색
-        ];
-
-        // 캔버스 사이즈 조절 및 위치 보정
-        function resizeCanvas() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-            objects.forEach(checkBoundary);
-        }
-        window.addEventListener('resize', resizeCanvas);
-
-        // 1. 텍스트 입력창 이벤트
-        titleInput.addEventListener('input', e => {
-            mainTitle.textContent = e.target.value.trim() || '바운싱 도형';
-        });
-
-        // 2. 전체 색상 변경 버튼 이벤트 (활성화된 도형만 무작위 색상으로)
-        colorBtn.addEventListener('click', () => {
-            objects.forEach(obj => {
-                if (obj.active) {
-                    obj.color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-                }
-            });
-        });
-
-        // 3. 속도 조절 슬라이더 이벤트
-        speedSlider.addEventListener('input', e => {
-            globalSpeed = parseInt(e.target.value);
-            speedValue.textContent = globalSpeed;
-        });
-
-        // 4. 크기 라디오 버튼 이벤트
-        sizeRadios.forEach(radio => {
-            radio.addEventListener('change', e => {
-                globalRadius = parseInt(e.target.value);
-                objects.forEach(checkBoundary); // 크기 변경 즉시 바운더리 검사
-            });
-        });
-
-        // 5. 별점 드롭다운 메뉴 이벤트
-        starSelect.addEventListener('change', e => {
-            starDisplay.textContent = e.target.value;
-        });
-
-        // 6. 아코디언 메뉴 속 체크박스 이벤트
-        shapeToggles.forEach(toggle => {
-            toggle.addEventListener('change', e => {
-                const shapeType = e.target.value;
-                const obj = objects.find(o => o.type === shapeType);
-                if (obj) {
-                    obj.active = e.target.checked;
-                }
-            });
-        });
-
-        // 도형 경계선 이탈 방지
-        function checkBoundary(obj) {
-            if (obj.x + globalRadius > canvas.width) obj.x = canvas.width - globalRadius;
-            if (obj.x - globalRadius < 0) obj.x = globalRadius;
-            if (obj.y + globalRadius > canvas.height) obj.y = canvas.height - globalRadius;
-            if (obj.y - globalRadius < 0) obj.y = globalRadius;
-        }
-
-        // 도형 그리기
-        function drawShape(obj) {
-            ctx.fillStyle = obj.color;
-            ctx.beginPath();
-            
-            if (obj.type === 'circle') {
-                ctx.arc(obj.x, obj.y, globalRadius, 0, Math.PI * 2);
-            } else if (obj.type === 'square') {
-                ctx.rect(obj.x - globalRadius, obj.y - globalRadius, globalRadius * 2, globalRadius * 2);
-            } else if (obj.type === 'triangle') {
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                ctx.lineTo(obj.x + globalRadius, obj.y + globalRadius);
-                ctx.lineTo(obj.x - globalRadius, obj.y + globalRadius);
-            } else if (obj.type === 'diamond') {
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                ctx.lineTo(obj.x + globalRadius, obj.y);
-                ctx.lineTo(obj.x, obj.y + globalRadius);
-                ctx.lineTo(obj.x - globalRadius, obj.y);
-            } else if (obj.type === 'star') {
-                let rot = Math.PI / 2 * 3;
-                let step = Math.PI / 5;
-                ctx.moveTo(obj.x, obj.y - globalRadius);
-                for (let i = 0; i < 5; i++) {
-                    ctx.lineTo(obj.x + Math.cos(rot) * globalRadius, obj.y + Math.sin(rot) * globalRadius);
-                    rot += step;
-                    ctx.lineTo(obj.x + Math.cos(rot) * (globalRadius / 2), obj.y + Math.sin(rot) * (globalRadius / 2));
-                    rot += step;
-                }
-            }
-            ctx.closePath();
-            ctx.fill();
-
-            // 입체감 (하이라이트) 부여
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            if (obj.type === 'circle') {
-                ctx.beginPath();
-                ctx.arc(obj.x - globalRadius*0.3, obj.y - globalRadius*0.3, globalRadius*0.4, 0, Math.PI*2);
-                ctx.fill();
-            } else if (obj.type === 'square') {
-                ctx.fillRect(obj.x - globalRadius, obj.y - globalRadius, globalRadius * 2, globalRadius * 0.5);
-            } else {
-                ctx.beginPath();
-                ctx.arc(obj.x, obj.y, globalRadius*0.3, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-
-        // 애니메이션 루프
-        function update() {
-            requestAnimationFrame(update);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            objects.forEach(obj => {
-                if (!obj.active) return; // 활성화되지 않은 도형은 그리지도 움직이지도 않음
-
-                drawShape(obj);
+            <!-- Project 11 섹션 -->
+            <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-700 border-b pb-2">Project 11 폴더</h2>
                 
-                // 속도 슬라이더 값 반영 (기본 속도 dx, dy에 슬라이더 배율 적용)
-                const currentSpeedMultiplier = globalSpeed / 4; 
-                obj.x += obj.dx * currentSpeedMultiplier;
-                obj.y += obj.dy * currentSpeedMultiplier;
+                <a href="project11/Bouncing%20Ball.html" class="block group relative p-5 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Bouncing Ball</h3>
+                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                                <span class="inline-block w-4 h-4 mr-1 text-gray-400">📁</span>
+                                project11/Bouncing Ball.html
+                            </p>
+                        </div>
+                        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
 
-                // 벽 충돌 감지 로직
-                if (obj.x + globalRadius > canvas.width || obj.x - globalRadius < 0) {
-                    obj.dx = -obj.dx;
-                    obj.x = obj.x + globalRadius > canvas.width ? canvas.width - globalRadius : globalRadius;
-                }
-                if (obj.y + globalRadius > canvas.height || obj.y - globalRadius < 0) {
-                    obj.dy = -obj.dy;
-                    obj.y = obj.y + globalRadius > canvas.height ? canvas.height - globalRadius : globalRadius;
-                }
-            });
-        }
+                <a href="project11/Bouncing%20Ball1.html" class="block group relative p-5 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Bouncing Ball 1</h3>
+                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                                <span class="inline-block w-4 h-4 mr-1 text-gray-400">📁</span>
+                                project11/Bouncing Ball1.html
+                            </p>
+                        </div>
+                        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
 
-        // 초기 렌더링 시작
-        resizeCanvas();
-        update();
-    </script>
+                <a href="project11/sticker.html" class="block group relative p-5 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Sticker</h3>
+                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                                <span class="inline-block w-4 h-4 mr-1 text-gray-400">📁</span>
+                                project11/sticker.html
+                            </p>
+                        </div>
+                        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Project 22 섹션 -->
+            <div class="space-y-4 pt-4">
+                <h2 class="text-2xl font-bold text-gray-700 border-b pb-2">Project 22 폴더</h2>
+                
+                <a href="project22/random.html" class="block group relative p-5 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Random</h3>
+                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                                <span class="inline-block w-4 h-4 mr-1 text-gray-400">📁</span>
+                                project22/random.html
+                            </p>
+                        </div>
+                        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="project22/time.html" class="block group relative p-5 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Time</h3>
+                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                                <span class="inline-block w-4 h-4 mr-1 text-gray-400">📁</span>
+                                project22/time.html
+                            </p>
+                        </div>
+                        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+        
+        <!-- 푸터 -->
+        <div class="bg-gray-50 p-4 text-center text-sm text-gray-500 border-t border-gray-200">
+            Powered by GitHub Pages
+        </div>
+    </div>
+
 </body>
 </html>

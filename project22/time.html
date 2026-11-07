@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝터 타이머 및 순서표</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 깜빡임 애니메이션 (시간 초과 시) */
+        @keyframes flash {
+            0%, 100% { opacity: 1; color: #ef4444; } /* red-500 */
+            50% { opacity: 0.5; color: #fca5a5; } /* red-300 */
+        }
+        .time-up {
+            animation: flash 1s infinite;
+        }
+
+        /* 스크롤바 숨기기 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="h-screen w-full bg-black overflow-hidden flex">
+
+    <!-- 알림 메시지 (Toast) -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 -translate-y-[150%] opacity-0 bg-gray-800 border border-gray-700 text-white px-6 py-3 rounded-lg shadow-2xl font-medium transition-all duration-300 z-50">
+        메시지 내용
+    </div>
+
+    <!-- 왼쪽: 설정 패널 -->
+    <aside id="sidebar" class="w-80 bg-white flex flex-col shadow-2xl transition-transform duration-300 z-20 shrink-0">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h1 class="text-xl font-black text-gray-800 flex items-center gap-2">
+                <span>⏱️</span> 컨트롤 패널
+            </h1>
+            <button id="hide-sidebar-btn" class="text-gray-400 hover:text-gray-700 transition-colors" title="패널 숨기기">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-6 flex-1 overflow-y-auto flex flex-col gap-6">
+            
+            <!-- 시간 설정 -->
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">기본 제공 시간</label>
+                <div class="flex gap-2 items-center">
+                    <div class="flex-1 relative">
+                        <input type="number" id="input-min" min="0" max="99" value="5" class="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg text-right">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">분</span>
+                    </div>
+                    <span class="font-bold text-gray-400">:</span>
+                    <div class="flex-1 relative">
+                        <input type="number" id="input-sec" min="0" max="59" value="0" class="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg text-right">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">초</span>
+                    </div>
+                </div>
+                <button id="apply-time-btn" class="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg transition-colors text-sm">
+                    시간 적용 및 초기화
+                </button>
+            </div>
+
+            <!-- 순서표 설정 -->
+            <div class="space-y-2 flex-1 flex flex-col">
+                <label class="block text-sm font-bold text-gray-700 flex justify-between items-end">
+                    <span>순서표 명단</span>
+                    <span class="text-xs font-normal text-gray-500">엔터로 구분</span>
+                </label>
+                <textarea id="schedule-input" class="w-full flex-1 min-h-[150px] p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm text-gray-700 leading-relaxed" placeholder="예시:&#13;&#10;1조 발표 (홍길동)&#13;&#10;2조 발표 (김철수)&#13;&#10;쉬는 시간&#13;&#10;3조 발표 (이영희)">1조 - 시장 분석
+2조 - 경쟁사 동향
+휴식 시간 (10분)
+3조 - 마케팅 전략
+4조 - 재무 계획
+Q&A 시간</textarea>
+            </div>
+        </div>
+
+        <!-- 컨트롤 버튼 영역 -->
+        <div class="p-6 bg-gray-50 border-t border-gray-100 space-y-4">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <button id="prev-btn" class="bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors flex justify-center items-center gap-1 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg> 이전
+                </button>
+                <button id="next-btn" class="bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors flex justify-center items-center gap-1 shadow-sm">
+                    다음 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button id="play-pause-btn" class="col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-md transition-transform active:scale-95 flex justify-center items-center gap-2 text-lg">
+                    <span id="play-icon">▶️</span> <span id="play-text">시작</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 오른쪽: 프로젝터 뷰 -->
+    <main class="flex-1 relative flex flex-col bg-gray-900 text-white overflow-hidden">
+        
+        <!-- 패널 보이기 버튼 (패널이 숨겨졌을 때 표시됨) -->
+        <button id="show-sidebar-btn" class="absolute top-6 left-6 text-gray-500 hover:text-white transition-colors bg-gray-800/50 p-2 rounded-lg backdrop-blur-sm hidden z-10" title="컨트롤 패널 열기">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <!-- 진행바 -->
+        <div class="absolute top-0 left-0 w-full h-2 bg-gray-800">
+            <div id="progress-bar" class="h-full bg-blue-500 transition-all duration-1000 ease-linear w-full"></div>
+        </div>
+
+        <div class="flex-1 flex flex-col justify-center items-center p-12 text-center relative z-0">
+            
+            <!-- 순서 표시 -->
+            <div class="mb-4">
+                <span class="px-4 py-1 bg-gray-800 text-gray-300 rounded-full text-xl font-bold tracking-widest uppercase border border-gray-700 shadow-inner">
+                    현재 진행 중
+                </span>
+            </div>
+            
+            <h2 id="current-title" class="text-5xl md:text-7xl font-black text-cyan-400 mb-12 drop-shadow-lg break-keep max-w-[90%] leading-tight">
+                대기 중입니다
+            </h2>
+
+            <!-- 타이머 표시 -->
+            <div id="timer-display" class="font-mono font-black tabular-nums tracking-tighter leading-none text-[15vw] drop-shadow-2xl transition-colors duration-300">
+                05:00
+            </div>
+
+            <!-- 다음 순서 표시 -->
+            <div class="mt-16 bg-gray-800/50 border border-gray-700 px-8 py-4 rounded-2xl backdrop-blur-md">
+                <p class="text-gray-400 font-bold text-lg mb-1 uppercase tracking-wider">Next Up</p>
+                <p id="next-title" class="text-2xl md:text-4xl font-bold text-gray-200">
+                    -
+                </p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // 요소 선택
+        const sidebar = document.getElementById('sidebar');
+        const hideSidebarBtn = document.getElementById('hide-sidebar-btn');
+        const showSidebarBtn = document.getElementById('show-sidebar-btn');
+        const inputMin = document.getElementById('input-min');
+        const inputSec = document.getElementById('input-sec');
+        const applyTimeBtn = document.getElementById('apply-time-btn');
+        const scheduleInput = document.getElementById('schedule-input');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const playText = document.getElementById('play-text');
+        
+        const currentTitle = document.getElementById('current-title');
+        const nextTitle = document.getElementById('next-title');
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('progress-bar');
+        const toast = document.getElementById('toast');
+
+        // 상태 변수
+        let schedule = [];
+        let currentIndex = 0;
+        let totalSeconds = 300; // 기본 5분
+        let remainingSeconds = 300;
+        let timerInterval = null;
+        let isRunning = false;
+
+        // --- UI 상호작용 ---
+
+        // 사이드바 토글
+        hideSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            setTimeout(() => {
+                sidebar.classList.add('hidden');
+                showSidebarBtn.classList.remove('hidden');
+            }, 300);
+        });
+
+        showSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('hidden');
+            // 브라우저 렌더링 프레임 대기 후 클래스 제거
+            requestAnimationFrame(() => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+            showSidebarBtn.classList.add('hidden');
+        });
+
+        // 토스트 알림
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('-translate-y-[150%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-[150%]', 'opacity-0');
+            }, 2500);
+        }
+
+        // --- 순서표 로직 ---
+
+        function updateSchedule() {
+            schedule = scheduleInput.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            renderProjector();
+        }
+
+        scheduleInput.addEventListener('input', updateSchedule);
+
+        function goNext() {
+            if (currentIndex < schedule.length - 1) {
+                currentIndex++;
+                renderProjector();
+                resetTimer(); // 다음 순서로 넘어갈 때 타이머 리셋
+            } else {
+                showToast("마지막 순서입니다.");
+            }
+        }
+
+        function goPrev() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderProjector();
+                resetTimer();
+            } else {
+                showToast("첫 번째 순서입니다.");
+            }
+        }
+
+        prevBtn.addEventListener('click', goPrev);
+        nextBtn.addEventListener('click', goNext);
+
+        // --- 타이머 로직 ---
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function applyInitialTime() {
+            const m = parseInt(inputMin.value) || 0;
+            const s = parseInt(inputSec.value) || 0;
+            totalSeconds = (m * 60) + s;
+            resetTimer();
+            showToast("시간이 적용되었습니다.");
+        }
+
+        applyTimeBtn.addEventListener('click', applyInitialTime);
+
+        function renderProjector() {
+            // 순서표 업데이트
+            if (schedule.length === 0) {
+                currentTitle.textContent = "대기 중입니다";
+                nextTitle.textContent = "명단을 입력해주세요";
+            } else {
+                currentTitle.textContent = schedule[currentIndex];
+                if (currentIndex + 1 < schedule.length) {
+                    nextTitle.textContent = schedule[currentIndex + 1];
+                } else {
+                    nextTitle.textContent = "종료";
+                }
+            }
+
+            // 타이머 업데이트
+            timerDisplay.textContent = formatTime(remainingSeconds);
+
+            // 프로그레스 바 업데이트
+            if (totalSeconds > 0) {
+                const percent = (remainingSeconds / totalSeconds) * 100;
+                progressBar.style.width = `${percent}%`;
+            } else {
+                progressBar.style.width = '0%';
+            }
+
+            // 색상 효과 업데이트
+            timerDisplay.classList.remove('time-up', 'text-red-500', 'text-yellow-400');
+            progressBar.classList.remove('bg-red-500', 'bg-yellow-400', 'bg-blue-500');
+
+            if (remainingSeconds === 0) {
+                timerDisplay.classList.add('time-up');
+                progressBar.classList.add('bg-red-500');
+            } else if (totalSeconds > 0 && remainingSeconds <= totalSeconds * 0.2) {
+                // 남은 시간이 20% 이하일 때 경고 색상
+                timerDisplay.classList.add('text-yellow-400');
+                progressBar.classList.add('bg-yellow-400');
+            } else {
+                timerDisplay.classList.add('text-white');
+                progressBar.classList.add('bg-blue-500');
+            }
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (remainingSeconds <= 0) return;
+            
+            isRunning = true;
+            playIcon.textContent = "⏸️";
+            playText.textContent = "일시정지";
+            playPauseBtn.classList.replace('bg-blue-600', 'bg-yellow-600');
+            playPauseBtn.classList.replace('hover:bg-blue-700', 'hover:bg-yellow-700');
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                renderProjector();
+
+                if (remainingSeconds <= 0) {
+                    pauseTimer();
+                    renderProjector(); // 0초 렌더링 및 이펙트 적용
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            playIcon.textContent = "▶️";
+            playText.textContent = "계속하기";
+            playPauseBtn.classList.replace('bg-yellow-600', 'bg-blue-600');
+            playPauseBtn.classList.replace('hover:bg-yellow-700', 'hover:bg-blue-700');
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            remainingSeconds = totalSeconds;
+            playIcon.textContent = "▶️";
+            playText.textContent = "시작";
+            renderProjector();
+        }
+
+        playPauseBtn.addEventListener('click', toggleTimer);
+
+        // 초기화 실행
+        updateSchedule();
+        applyInitialTime();
+
+        // 키보드 단축키 지원 (스페이스바: 재생/정지, 좌/우 방향키: 순서 이동)
+        document.addEventListener('keydown', (e) => {
+            // input이나 textarea 입력 중일 때는 단축키 무시
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'ArrowRight') {
+                goNext();
+            } else if (e.code === 'ArrowLeft') {
+                goPrev();
+            }
+        });
+
+    </script>
+</body>
+</html>

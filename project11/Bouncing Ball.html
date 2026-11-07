@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing Ball</title>
+    <!-- 스타일링을 위해 Tailwind CSS 사용 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            /* 페이지 전체 배경색 설정 */
+            background-color: #f3f4f6; 
+            margin: 0;
+            overflow: hidden; /* 스크롤바 방지 */
+        }
+        
+        #canvas-container {
+            /* 캔버스가 화면에 꽉 차면서도 직사각형 비율을 유지하도록 설정 */
+            width: 90vw;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #1e293b; /* 캔버스 뒷배경 (어두운 남색) */
+            border: 4px solid #334155;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">바운싱 볼</h1>
+        <p class="text-gray-500 mt-2 mb-4">공이 벽에 부딪히면 튕겨 나옵니다.</p>
+        <button id="colorBtn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out transform hover:-translate-y-0.5">
+            공 색상 변경하기
+        </button>
+    </div>
+
+    <!-- 캔버스를 감싸는 컨테이너 -->
+    <div id="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 캔버스 크기를 내부 해상도와 CSS 렌더링 크기와 일치시키는 함수
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            // 레티나 디스플레이 등 고해상도 화면에서도 선명하게 보이도록 처리 가능하지만,
+            // 여기서는 단순함을 위해 컨테이너의 실제 크기로 설정합니다.
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        // 초기 사이즈 설정
+        resizeCanvas();
+
+        // 창 크기가 변경될 때 캔버스 크기 재조정
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            // 화면 크기가 변할 때 공이 화면 밖으로 나가는 것을 방지
+            if (ball.x > canvas.width - ball.radius) ball.x = canvas.width - ball.radius;
+            if (ball.y > canvas.height - ball.radius) ball.y = canvas.height - ball.radius;
+        });
+
+        // 공 객체 정의
+        const ball = {
+            x: canvas.width / 2, // 시작 x 좌표 (중앙)
+            y: canvas.height / 2, // 시작 y 좌표 (중앙)
+            radius: 20,           // 공의 반지름
+            dx: 5,                // x축 이동 속도
+            dy: 4,                // y축 이동 속도
+            color: '#f43f5e'      // 눈에 띄는 장미색(Rose) 설정
+        };
+
+        // 랜덤 색상 생성 함수
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // 버튼 클릭 이벤트 리스너
+        document.getElementById('colorBtn').addEventListener('click', () => {
+            ball.color = getRandomColor();
+        });
+
+        // 공을 그리는 함수
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            
+            // 공에 약간의 입체감을 주기 위한 그라데이션 (선택사항)
+            const gradient = ctx.createRadialGradient(
+                ball.x - ball.radius / 3, ball.y - ball.radius / 3, ball.radius / 10, 
+                ball.x, ball.y, ball.radius
+            );
+            // 어떤 색상이 무작위로 선택되든 자연스럽게 하이라이트가 지도록 흰색 반투명 사용
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)'); 
+            gradient.addColorStop(1, ball.color); // 기본 색
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // 애니메이션 업데이트 함수
+        function update() {
+            // 이전 프레임의 흔적을 지우기 (직사각형 배경을 칠함)
+            // 투명도를 주어 꼬리 효과를 만들 수도 있지만, 명확한 배경을 원하셨으므로 clearRect 사용
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 공 그리기
+            drawBall();
+
+            // 왼쪽 또는 오른쪽 벽 충돌 감지
+            if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
+                ball.dx = -ball.dx; // x축 방향 반전
+            }
+
+            // 위쪽 또는 아래쪽 벽 충돌 감지
+            if (ball.y + ball.dy > canvas.height - ball.radius || ball.y + ball.dy < ball.radius) {
+                ball.dy = -ball.dy; // y축 방향 반전
+            }
+
+            // 공의 위치 이동
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // 다음 프레임 요청
+            requestAnimationFrame(update);
+        }
+
+        // 애니메이션 시작
+        window.onload = function() {
+            update();
+        }
+    </script>
+</body>
+</html>
